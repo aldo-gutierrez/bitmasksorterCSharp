@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using static BitMaskSorter.BitSorterUtils;
 using static BitMaskSorter.IntSorterUtils;
 
@@ -20,74 +18,87 @@ namespace BitMaskSorter
             this.unsigned = unsigned;
         }
 
-        public void sort(int[] array)
+        public void sort(int[] array, int start, int endP1)
         {
-            if (array.Length < 2)
+            int n = endP1 - start;
+            if (n < 2)
             {
                 return;
             }
-            int start = 0;
-            int end = array.Length;
-//            int ordered = isUnsigned() ? listIsOrderedUnSigned(array, start, end) : listIsOrderedSigned(array, start, end);
-//            if (ordered == AnalysisResult.DESCENDING)
-//            {
-//                IntSorterUtils.reverse(array, start, end);
-//            }
-//            if (ordered != AnalysisResult.UNORDERED) return;
 
-            int[] maskParts = getMaskBit(array, start, end);
-            int mask = maskParts[0] & maskParts[1];
+            var maskParts = getMaskBit(array, start, endP1);
+            int mask = maskParts.Item1 & maskParts.Item2;
             int[] kList = getMaskAsArray(mask);
             if (kList.Length == 0)
             {
                 return;
             }
+
             if (kList[0] == 31)
-            { //there are negative numbers and positive numbers
-                int sortMask = BitSorterUtils.getMaskBit(kList[0]);
+            {
+                //there are negative numbers and positive numbers
+                int sortMask = 1 << kList[0];
                 int finalLeft = isUnsigned()
-                        ? IntSorterUtils.partitionNotStable(array, start, end, sortMask)
-                        : IntSorterUtils.partitionReverseNotStable(array, start, end, sortMask);
-                if (finalLeft - start > 1)
-                { //sort negative numbers
-                    int[] aux = new int[finalLeft - start];
+                    ? IntSorterUtils.PartitionNotStable(array, start, endP1, sortMask)
+                    : IntSorterUtils.PartitionReverseNotStable(array, start, endP1, sortMask);
+                int n1 = finalLeft - start;
+                int n2 = endP1 - finalLeft;
+
+                if (n1 > 1)
+                {
+                    //sort negative numbers
                     maskParts = getMaskBit(array, start, finalLeft);
-                    mask = maskParts[0] & maskParts[1];
+                    mask = maskParts.Item1 & maskParts.Item2;
                     kList = getMaskAsArray(mask);
-                    radixSort(array, start, finalLeft, kList, kList.Length - 1, 0, aux);
+                    if (kList.Length > 0)
+                    {
+                        radixSort(array, start, finalLeft, kList);
+                    }
                 }
-                if (end - finalLeft > 1)
-                { //sort positive numbers
-                    int[] aux = new int[end - finalLeft];
-                    maskParts = getMaskBit(array, finalLeft, end);
-                    mask = maskParts[0] & maskParts[1];
+
+                if (n2 > 1)
+                {
+                    //sort positive numbers
+                    maskParts = getMaskBit(array, finalLeft, endP1);
+                    mask = maskParts.Item1 & maskParts.Item2;
                     kList = getMaskAsArray(mask);
-                    radixSort(array, finalLeft, end, kList, kList.Length - 1, 0, aux);
+                    if (kList.Length > 0)
+                    {
+                        radixSort(array, finalLeft, endP1, kList);
+                    }
                 }
             }
             else
             {
-                int[] aux = new int[end - start];
-                radixSort(array, start, end, kList, kList.Length - 1, 0, aux);
+                radixSort(array, start, endP1, kList);
             }
         }
 
-        public static void radixSort(int[] array, int start, int end, int[] kList, int kIndexStart, int kIndexEnd, int[] aux)
+        private void radixSort(int[] array, int start, int endP1, int[] kList)
+        {
+            int[] aux = new int[endP1 - start];
+            radixSort(array, start, endP1, kList, kList.Length - 1, 0, aux);
+        }
+
+
+        private static void radixSort(int[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
+            int[] aux)
         {
             for (int i = kIndexStart; i >= kIndexEnd; i--)
             {
                 int kListI = kList[i];
-                int maskI = BitSorterUtils.getMaskBit(kListI);
+                int maskI = 1 << kListI;
                 int bits = 1;
                 int imm = 0;
                 for (int j = 1; j <= 11; j++)
-                { //11bits looks faster than 8 on AMD 4800H, 15 is slower
+                {
+                    //11bits looks faster than 8 on AMD 4800H, 15 is slower
                     if (i - j >= kIndexEnd)
                     {
                         int kListIm1 = kList[i - j];
                         if (kListIm1 == kListI + j)
                         {
-                            int maskIm1 = BitSorterUtils.getMaskBit(kListIm1);
+                            int maskIm1 = 1 << kListIm1;
                             maskI = maskI | maskIm1;
                             bits++;
                             imm++;
@@ -98,31 +109,25 @@ namespace BitMaskSorter
                         }
                     }
                 }
+
                 i -= imm;
                 if (bits == 1)
                 {
-                    IntSorterUtils.partitionStable(array, start, end, maskI, aux);
+                    IntSorterUtils.PartitionStable(array, start, endP1, maskI, aux);
                 }
                 else
                 {
-                    int twoPowerBits = BitSorterUtils.twoPowerX(bits);
+                    int twoPowerBits = 1 << bits;
                     if (kListI == 0)
                     {
-                        partitionStableLastBits(array, start, end, maskI, twoPowerBits, aux);
+                        PartitionStableLastBits(array, start, endP1, maskI, twoPowerBits, aux);
                     }
                     else
                     {
-                        partitionStableGroupBits(array, start, end, maskI, kListI, twoPowerBits, aux);
+                        PartitionStableOneGroupBits(array, start, endP1, maskI, kListI, twoPowerBits, aux);
                     }
                 }
             }
         }
-
-        static void Main(string[] args)
-        {
-            // Display the number of command line arguments.
-            Console.WriteLine(args.Length);
-        }
-
     }
 }

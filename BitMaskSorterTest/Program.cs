@@ -3,7 +3,6 @@ using System.Diagnostics;
 using BitMaskSorter;
 
 Stopwatch stopwatch = new Stopwatch();
-Console.WriteLine("Hello, World!");
 Random rnd = new Random();
 
 int arraySize = 1000000;
@@ -34,12 +33,10 @@ for (int j = 0; j < iterations; j++)
     Console.WriteLine("Elapsed Time C#    is {0} ms", stopwatch.ElapsedMilliseconds);
     totalCSharp += stopwatch.ElapsedMilliseconds;
 
-    intArrayAux = new int[arraySize];
-    Array.Copy(intArray, intArrayAux, arraySize);
     stopwatch = new Stopwatch();
     stopwatch.Start();
     RadixBitSorterInt radixBiSorterInt = new RadixBitSorterInt();
-    radixBiSorterInt.sort(intArray);
+    radixBiSorterInt.sort(intArrayAux, 0, intArrayAux.Length);
     stopwatch.Stop();
     Console.WriteLine("Elapsed Time Radix is  {0} ms", stopwatch.ElapsedMilliseconds);
     totalRadix += stopwatch.ElapsedMilliseconds;

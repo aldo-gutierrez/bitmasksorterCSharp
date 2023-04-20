@@ -1,22 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BitMaskSorter
 {
     internal class IntSorterUtils
     {
-        public static void swap(int[] array, int left, int right)
+        public static void Swap(int[] array, int left, int right)
         {
             int aux = array[left];
             array[left] = array[right];
             array[right] = aux;
         }
 
-        public static int partitionNotStable(int[] array, int start, int end, int mask)
+        public static int PartitionNotStable(int[] array, int start, int endP1, int mask)
         {
             int left = start;
-            int right = end - 1;
+            int right = endP1 - 1;
 
             while (left <= right)
             {
@@ -32,7 +30,7 @@ namespace BitMaskSorter
                         element = array[right];
                         if ((element & mask) == 0)
                         {
-                            swap(array, left, right);
+                            Swap(array, left, right);
                             left++;
                             right--;
                             break;
@@ -44,13 +42,14 @@ namespace BitMaskSorter
                     }
                 }
             }
+
             return left;
         }
 
-        public static int partitionReverseNotStable(int[] array, int start, int end, int mask)
+        public static int PartitionReverseNotStable(int[] array, int start, int endP1, int mask)
         {
             int left = start;
-            int right = end - 1;
+            int right = endP1 - 1;
 
             while (left <= right)
             {
@@ -66,7 +65,7 @@ namespace BitMaskSorter
                         }
                         else
                         {
-                            swap(array, left, right);
+                            Swap(array, left, right);
                             left++;
                             right--;
                             break;
@@ -78,14 +77,15 @@ namespace BitMaskSorter
                     left++;
                 }
             }
+
             return left;
         }
 
-        public static int partitionStable(int[] array, int start, int end, int mask, int[] aux)
+        public static int PartitionStable(int[] array, int start, int endP1, int mask, int[] aux)
         {
             int left = start;
             int right = 0;
-            for (int i = start; i < end; i++)
+            for (int i = start; i < endP1; i++)
             {
                 int element = array[i];
                 if ((element & mask) == 0)
@@ -99,54 +99,59 @@ namespace BitMaskSorter
                     right++;
                 }
             }
+
             Array.Copy(aux, 0, array, left, right);
             return left;
         }
 
-        public static void partitionStableLastBits(int[] array, int start, int end, int mask, int twoPowerK, int[] aux)
+        public static void PartitionStableLastBits(int[] array, int start, int endP1, int mask, int twoPowerK,
+            int[] aux)
         {
-            int[] leftX = new int[twoPowerK];
             int[] count = new int[twoPowerK];
-            for (int i = start; i < end; i++)
+            for (int i = start; i < endP1; ++i)
             {
                 count[array[i] & mask]++;
             }
-            for (int i = 1; i < twoPowerK; i++)
+
+            for (int i = 0, sum = 0; i < twoPowerK; ++i)
             {
-                leftX[i] = leftX[i - 1] + count[i - 1];
+                int countI = count[i];
+                count[i] = sum;
+                sum += countI;
             }
-            for (int i = start; i < end; i++)
+
+            for (int i = start; i < endP1; ++i)
             {
                 int element = array[i];
-                int elementShiftMasked = element & mask;
-                aux[leftX[elementShiftMasked]] = element;
-                leftX[elementShiftMasked]++;
+                aux[count[element & mask]++] = element;
             }
-            Array.Copy(aux, 0, array, start, end - start);
+
+            Array.Copy(aux, 0, array, start, endP1 - start);
         }
 
-        public static void partitionStableGroupBits(int[] array, int start, int end, int mask, int shiftRight, int twoPowerK, int[] aux)
+        public static void PartitionStableOneGroupBits(int[] array, int start, int endP1, int mask, int shiftRight,
+            int twoPowerK, int[] aux)
         {
-            int[] leftX = new int[twoPowerK];
             int[] count = new int[twoPowerK];
-             for (int i = start; i < end; i++)
+            for (int i = start; i < endP1; i++)
             {
                 count[(array[i] & mask) >> shiftRight]++;
             }
-            for (int i = 1; i < twoPowerK; i++)
+
+            for (int i = 0, sum = 0; i < twoPowerK; ++i)
             {
-                leftX[i] = leftX[i - 1] + count[i - 1];
+                int countI = count[i];
+                count[i] = sum;
+                sum += countI;
             }
-            for (int i = start; i < end; i++)
+
+            for (int i = start; i < endP1; i++)
             {
                 int element = array[i];
-                int elementShiftMasked = (element & mask) >> shiftRight;
-                aux[leftX[elementShiftMasked]] = element;
-                leftX[elementShiftMasked]++;
+                aux[count[(element & mask) >> shiftRight]++] = element;
             }
-            Array.Copy(aux, 0, array, start, end - start);
+
+            Array.Copy(aux, 0, array, start, endP1 - start);
         }
-
-
     }
 }

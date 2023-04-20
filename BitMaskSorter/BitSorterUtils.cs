@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace BitMaskSorter
 {
     internal class BitSorterUtils
     {
-        public static int[] getMaskBit(int[] array, int start, int end)
+        public static (int, int) getMaskBit(int[] array, int start, int endP1)
         {
             int mask = 0x00000000;
             int inv_mask = 0x00000000;
-            for (int i = start; i < end; i++)
+            for (int i = start; i < endP1; i++)
             {
                 int ei = array[i];
                 mask = mask | ei;
                 inv_mask = inv_mask | (~ei);
             }
-            return new int[] { mask, inv_mask };
+
+            return ( mask, inv_mask );
         }
 
         public static int[] getMaskAsArray(int mask)
@@ -29,24 +28,8 @@ namespace BitMaskSorter
                     list.Add(i);
                 }
             }
-            int[] res = new int[list.Count];
-            for (int i = 0; i < list.Count; i++)
-            {
-                res[i] = list[i];
-            }
-            return res;
+
+            return list.ToArray();
         }
-
-        public static int getMaskBit(int k)
-        {
-            return 1 << k;
-        }
-
-        public static int twoPowerX(int k)
-        {
-            return 1 << k;
-        }
-
-
     }
 }
