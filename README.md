@@ -15,10 +15,12 @@ upto 11 bits at a time.
 Comparison for sorting 1 Million int elements with range from 0 to 1000
 AMD Ryzen 7 4800H processor, VisualStudio 2022, Net 6.0, Power Options: High Performance
 
-| Algorithm         | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
-|-------------------|-----------------------------:|-------------------------------:|
-| C# sort           |                       47->48 |                          41->39|
-| RadixBitSorterInt |                       12->13 |                           6->4 |
+| Algorithm                  | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
+|----------------------------|-----------------------------:|-------------------------------:|
+| C# sort                    |                           34 |                             34 |
+| RadixBitSorterInt          |                           13 |                              4 |
+| RadixBitSorterGenericInt   |                           29 |                              8 |
+| RadixBitSorterGeneric<int> |                           76 |                             31 |
 
 
 Comparison for sorting 40 Million int elements with range from 0 to 1000 Million
@@ -26,8 +28,8 @@ AMD Ryzen 7 4800H processor, VisualStudio 2022, Net 6.0, Power Options: High Per
 
 | Algorithm         | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
 |-------------------|-----------------------------:|-------------------------------:|
-| C# sort           |                    4476-4393 |                      3656-3559 |
-| RadixBitSorterInt |                    1649-1586 |                        783-763 |
+| C# sort           |                         2797 |                           2785 |
+| RadixBitSorterInt |                         1560 |                            731 |
 
 # TODO
 - Make more graphs

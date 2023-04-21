@@ -1,12 +1,10 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using BitMaskSorter;
 
-Stopwatch stopwatch = new Stopwatch();
 Random rnd = new Random();
 
-int arraySize = 1000000;
-int range = 1000;
+int arraySize = 40000000;
+int range = 1000000000;
 int iterations = 100;
 long totalCSharp = 0;
 long totalRadix = 0;
@@ -27,19 +25,23 @@ for (int j = 0; j < iterations; j++)
     Array.Copy(intArray, intArrayAux, arraySize);
 
     // Sort array in ASC order
-    stopwatch.Start();
+    Stopwatch stopwatch1 = new Stopwatch();
+    stopwatch1.Start();
     Array.Sort(intArray);
-    stopwatch.Stop();
-    Console.WriteLine("Elapsed Time C#    is {0} ms", stopwatch.ElapsedMilliseconds);
-    totalCSharp += stopwatch.ElapsedMilliseconds;
+    stopwatch1.Stop();
+    Console.WriteLine("Elapsed Time C#    is {0} ms", stopwatch1.ElapsedMilliseconds);
+    totalCSharp += stopwatch1.ElapsedMilliseconds;
 
-    stopwatch = new Stopwatch();
-    stopwatch.Start();
-    RadixBitSorterInt radixBiSorterInt = new RadixBitSorterInt();
-    radixBiSorterInt.sort(intArrayAux, 0, intArrayAux.Length);
-    stopwatch.Stop();
-    Console.WriteLine("Elapsed Time Radix is  {0} ms", stopwatch.ElapsedMilliseconds);
-    totalRadix += stopwatch.ElapsedMilliseconds;
+    Stopwatch stopwatch2 = new Stopwatch();
+    stopwatch2.Start();
+    new RadixBitSorterInt().sort(intArrayAux, 0, intArrayAux.Length);
+
+    //new RadixBitSorterGenericInt().sort(intArrayAux, 0, intArrayAux.Length);
+    //new RadixBitSorterGeneric<int>().sort(intArrayAux, 0, intArrayAux.Length);
+
+    stopwatch2.Stop();
+    Console.WriteLine("Elapsed Time Radix is  {0} ms", stopwatch2.ElapsedMilliseconds);
+    totalRadix += stopwatch2.ElapsedMilliseconds;
 
     // Linearly compare elements
     for (int i = 0; i < arraySize; i++)
