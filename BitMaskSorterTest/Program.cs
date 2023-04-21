@@ -3,8 +3,8 @@ using BitMaskSorter;
 
 Random rnd = new Random();
 
-int arraySize = 40000000;
-int range = 1000000000;
+int arraySize = 1000000;
+int range = 1000;
 int iterations = 100;
 long totalCSharp = 0;
 long totalRadix = 0;
@@ -14,12 +14,15 @@ for (int j = 0; j < iterations; j++)
 {
     // Array of integers
     int[] intArray = new int[arraySize];
+    //float[] intArray = new float[arraySize];
 
     for (int i = 0; i < arraySize; i++)
     {
         intArray[i] = rnd.Next(1, range);
+        //intArray[i] = rnd.Next(1, range) - range/2 + rnd.Next(50)/1000;
     }
 
+    //float[] intArrayAux = new float[arraySize];
     int[] intArrayAux = new int[arraySize];
 
     Array.Copy(intArray, intArrayAux, arraySize);
@@ -37,7 +40,7 @@ for (int j = 0; j < iterations; j++)
     new RadixBitSorterInt().sort(intArrayAux, 0, intArrayAux.Length);
 
     //new RadixBitSorterGenericInt().sort(intArrayAux, 0, intArrayAux.Length);
-    //new RadixBitSorterGeneric<int>().sort(intArrayAux, 0, intArrayAux.Length);
+    //new RadixBitSorterGenericFloat().sort(intArrayAux, 0, intArrayAux.Length);
 
     stopwatch2.Stop();
     Console.WriteLine("Elapsed Time Radix is  {0} ms", stopwatch2.ElapsedMilliseconds);

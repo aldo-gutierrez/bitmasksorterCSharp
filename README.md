@@ -19,8 +19,7 @@ AMD Ryzen 7 4800H processor, VisualStudio 2022, Net 6.0, Power Options: High Per
 |----------------------------|-----------------------------:|-------------------------------:|
 | C# sort                    |                           34 |                             34 |
 | RadixBitSorterInt          |                           13 |                              4 |
-| RadixBitSorterGenericInt   |                           29 |                              8 |
-| RadixBitSorterGeneric<int> |                           76 |                             31 |
+| RadixBitSorterGenericInt   |                           29 |                              9 |
 
 
 Comparison for sorting 40 Million int elements with range from 0 to 1000 Million
