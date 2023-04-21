@@ -28,21 +28,21 @@ long elements
 | Algorithm                  | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
 |----------------------------|-----------------------------:|-------------------------------:|
 | C# sort                    |                            36|                             36 |
-| RadixBitSorterGenericInt   |                            20|                              8 |
+| RadixBitSorterGenericLong  |                            20|                              8 |
 
 float elements
 
 | Algorithm                  | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
 |----------------------------|-----------------------------:|-------------------------------:|
 | C# sort                    |                            46|                             46 |
-| RadixBitSorterGenericInt   |                            36|                             13 |
+| RadixBitSorterGenericFloat |                            36|                             13 |
 
 double elements
 
 | Algorithm                  | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
 |----------------------------|-----------------------------:|-------------------------------:|
 | C# sort                    |                            46|                             46 |
-| RadixBitSorterGenericInt   |                            36|                             14 |
+| RadixBitSorterGenericDouble|                            36|                             14 |
 
 
 Comparison for sorting 40 Million int elements with range from 0 to 1000 Million

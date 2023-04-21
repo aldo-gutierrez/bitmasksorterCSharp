@@ -373,10 +373,6 @@ namespace BitMaskSorter
         //(e & eAndMaskShift) == 0;
         protected abstract bool eMaskedEq0(T e, V mask);
 
-
-        //https://stackoverflow.com/questions/27237776/convertToInt-int-bits-to-float-bits
-        //https://stackoverflow.com/questions/26394616/c-sharp-equivalent-to-javas-float-floattointbits
-
         protected long DoubleToLong(double d)
         {
             return BitConverter.DoubleToInt64Bits(d);
