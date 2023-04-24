@@ -6,16 +6,9 @@ namespace BitMaskSorter
 {
     public class RadixBitSorterInt
     {
-        bool unsigned = false;
-
-        public bool isUnsigned()
+        public bool IsUnsigned()
         {
-            return unsigned;
-        }
-
-        public void setUnsigned(bool unsigned)
-        {
-            this.unsigned = unsigned;
+            return false;
         }
 
         public void sort(int[] array, int start, int endP1)
@@ -26,9 +19,9 @@ namespace BitMaskSorter
                 return;
             }
 
-            var maskParts = getMaskBit(array, start, endP1);
+            var maskParts = GetMaskInfo(array, start, endP1);
             int mask = maskParts.Item1 & maskParts.Item2;
-            int[] kList = getMaskAsArray(mask);
+            int[] kList = GetMaskAsArray(mask);
             if (kList.Length == 0)
             {
                 return;
@@ -38,7 +31,7 @@ namespace BitMaskSorter
             {
                 //there are negative numbers and positive numbers
                 int sortMask = 1 << kList[0];
-                int finalLeft = isUnsigned()
+                int finalLeft = IsUnsigned()
                     ? IntSorterUtils.PartitionNotStable(array, start, endP1, sortMask)
                     : IntSorterUtils.PartitionReverseNotStable(array, start, endP1, sortMask);
                 int n1 = finalLeft - start;
@@ -47,41 +40,41 @@ namespace BitMaskSorter
                 if (n1 > 1)
                 {
                     //sort negative numbers
-                    maskParts = getMaskBit(array, start, finalLeft);
+                    maskParts = GetMaskInfo(array, start, finalLeft);
                     mask = maskParts.Item1 & maskParts.Item2;
-                    kList = getMaskAsArray(mask);
+                    kList = GetMaskAsArray(mask);
                     if (kList.Length > 0)
                     {
-                        radixSort(array, start, finalLeft, kList);
+                        RadixSort(array, start, finalLeft, kList);
                     }
                 }
 
                 if (n2 > 1)
                 {
                     //sort positive numbers
-                    maskParts = getMaskBit(array, finalLeft, endP1);
+                    maskParts = GetMaskInfo(array, finalLeft, endP1);
                     mask = maskParts.Item1 & maskParts.Item2;
-                    kList = getMaskAsArray(mask);
+                    kList = GetMaskAsArray(mask);
                     if (kList.Length > 0)
                     {
-                        radixSort(array, finalLeft, endP1, kList);
+                        RadixSort(array, finalLeft, endP1, kList);
                     }
                 }
             }
             else
             {
-                radixSort(array, start, endP1, kList);
+                RadixSort(array, start, endP1, kList);
             }
         }
 
-        private void radixSort(int[] array, int start, int endP1, int[] kList)
+        private void RadixSort(int[] array, int start, int endP1, int[] kList)
         {
             int[] aux = new int[endP1 - start];
-            radixSort(array, start, endP1, kList, kList.Length - 1, 0, aux);
+            RadixSort(array, start, endP1, kList, kList.Length - 1, 0, aux);
         }
 
 
-        private static void radixSort(int[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
+        private static void RadixSort(int[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
             int[] aux)
         {
             for (int i = kIndexStart; i >= kIndexEnd; i--)
