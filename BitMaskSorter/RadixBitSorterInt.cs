@@ -19,7 +19,7 @@ namespace BitMaskSorter
                 return;
             }
 
-            var maskParts = GetMaskInfo(array, start, endP1);
+            var maskParts = CalculateMaskParts(array, start, endP1);
             int mask = maskParts.Item1 & maskParts.Item2;
             int[] kList = GetMaskAsArray(mask);
             if (kList.Length == 0)
@@ -40,7 +40,7 @@ namespace BitMaskSorter
                 if (n1 > 1)
                 {
                     //sort negative numbers
-                    maskParts = GetMaskInfo(array, start, finalLeft);
+                    maskParts = CalculateMaskParts(array, start, finalLeft);
                     mask = maskParts.Item1 & maskParts.Item2;
                     kList = GetMaskAsArray(mask);
                     if (kList.Length > 0)
@@ -52,7 +52,7 @@ namespace BitMaskSorter
                 if (n2 > 1)
                 {
                     //sort positive numbers
-                    maskParts = GetMaskInfo(array, finalLeft, endP1);
+                    maskParts = CalculateMaskParts(array, finalLeft, endP1);
                     mask = maskParts.Item1 & maskParts.Item2;
                     kList = GetMaskAsArray(mask);
                     if (kList.Length > 0)

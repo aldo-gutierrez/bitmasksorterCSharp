@@ -28,14 +28,14 @@ long elements
 | Algorithm                  | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
 |----------------------------|-----------------------------:|-------------------------------:|
 | C# sort                    |                            36|                             36 |
-| RadixBitSorterGenericLong  |                            20|                              8 |
+| RadixBitSorterGenericLong  |                            20|                              9 |
 
 float elements
 
 | Algorithm                  | AVG CPU time [ms] Debug Mode | AVG CPU time [ms] Release Mode |
 |----------------------------|-----------------------------:|-------------------------------:|
 | C# sort                    |                            46|                             46 |
-| RadixBitSorterGenericFloat |                            36|                             13 |
+| RadixBitSorterGenericFloat |                            36|                             14 |
 
 double elements
 

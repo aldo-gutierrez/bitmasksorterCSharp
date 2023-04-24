@@ -15,23 +15,21 @@ namespace BitMaskSorter
                 return;
             }
 
-            var maskInfo = GetMaskInfo(array, start, endP1);
-            V mask = GetMask(maskInfo);
-            int[] kList = GetMaskAsArray(mask);
+            MaskInfo<V> maskInfo = GetMaskInfoBuilder();
+            maskInfo.SetMaskParts(maskInfo.CalculateMaskParts(MapToMask(), array, start, endP1));
+            V mask = maskInfo.GetMask();
+            int[] kList = maskInfo.GetMaskAsArray(mask);
             if (kList.Length == 0)
             {
                 return;
             }
 
-            if (kList[0] == GetUpperBit())
+            if (kList[0] == maskInfo.GetUpperBit())
             {
                 //there are negative numbers and positive numbers
-//                V sortMask = GetUpperBitMask();
                 int finalLeft = IsUnsigned()
-//                    ? PartitionNotStable(array, start, endP1, e => MaskedEqZero(e, sortMask))
-//                    : PartitionReverseNotStable(array, start, endP1, e => MaskedEqZero(e, sortMask));
-                    ? PartitionNotStable(array, start, endP1, e => GreaterOrEqZero(e))
-                    : PartitionReverseNotStable(array, start, endP1, e => GreaterOrEqZero(e));
+                    ? PartitionNotStable(array, start, endP1, (e) => maskInfo.GreaterOrEqZero(MapToMask(), e))
+                    : PartitionReverseNotStable(array, start, endP1, e => maskInfo.GreaterOrEqZero(MapToMask(), e));
 
                 int n1 = finalLeft - start;
                 int n2 = endP1 - finalLeft;
@@ -39,9 +37,9 @@ namespace BitMaskSorter
                 if (n1 > 1)
                 {
                     //sort negative numbers
-                    maskInfo = GetMaskInfo(array, start, finalLeft);
-                    mask = GetMask(maskInfo);
-                    kList = GetMaskAsArray(mask);
+                    maskInfo.SetMaskParts(maskInfo.CalculateMaskParts(MapToMask(), array, start, finalLeft));
+                    mask = maskInfo.GetMask();
+                    kList = maskInfo.GetMaskAsArray(mask);
                     if (kList.Length > 0)
                     {
                         RadixSort(array, start, finalLeft, kList);
@@ -55,9 +53,9 @@ namespace BitMaskSorter
                 if (n2 > 1)
                 {
                     //sort positive numbers
-                    maskInfo = GetMaskInfo(array, finalLeft, endP1);
-                    mask = GetMask(maskInfo);
-                    kList = GetMaskAsArray(mask);
+                    maskInfo.SetMaskParts(maskInfo.CalculateMaskParts(MapToMask(), array, finalLeft, endP1));
+                    mask = maskInfo.GetMask();
+                    kList = maskInfo.GetMaskAsArray(mask);
                     if (kList.Length > 0)
                     {
                         RadixSort(array, finalLeft, endP1, kList);
@@ -69,8 +67,8 @@ namespace BitMaskSorter
                 RadixSort(array, start, endP1, kList);
                 if (IsIEEE754())
                 {
-                    V sortMask = GetUpperBitMask();
-                    if (!MaskedEqZero(array[0], sortMask))
+                    V sortMask = maskInfo.GetUpperBitMask();
+                    if (!maskInfo.MaskedEqZero(MapToMask(), array[0], sortMask))
                     {
                         Reverse(array, start, endP1);
                     }
@@ -88,7 +86,8 @@ namespace BitMaskSorter
         private void RadixSort(T[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
             T[] aux)
         {
-            List<(V, int, int)> sections = GetSections(kList, kIndexStart, kIndexEnd);
+            MaskInfo<V> maskInfo = GetMaskInfoBuilder();
+            List<(V, int, int)> sections = maskInfo.GetSections(kList, kIndexStart, kIndexEnd);
             foreach (var section in sections)
             {
                 V maskI = section.Item1;
@@ -96,97 +95,18 @@ namespace BitMaskSorter
                 int shift = section.Item3;
                 if (bits == 1)
                 {
-                    PartitionStable(array, start, endP1, e => MaskedEqZero(e, maskI), aux);
+                    PartitionStable(array, start, endP1, e => maskInfo.MaskedEqZero(MapToMask(), e, maskI), aux);
                 }
                 else
                 {
                     int twoPowerBits = 1 << bits;
-                    PartitionStableBitsX(array, start, endP1, maskI, shift, twoPowerBits, aux);
+                    PartitionStableBits(array, start, endP1, maskI, shift, twoPowerBits, aux);
                 }
             }
         }
 
-        protected abstract void PartitionStableBitsX(T[] array, int start, int endP1, V maskI, int shift,
+        protected abstract void PartitionStableBits(T[] array, int start, int endP1, V maskI, int shift,
             int twoPowerBits, T[] aux);
-
-        protected abstract List<(V, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd);
-
-        protected List<(int, int, int)> getSectionsInt(int[] kList, int kIndexStart, int kIndexEnd)
-        {
-            List<(int, int, int)> parts = new List<(int, int, int)>();
-            for (int i = kIndexStart; i >= kIndexEnd; i--)
-            {
-                int kListI = kList[i];
-                int maskI = 1 << kListI;
-                int bits = 1;
-                int imm = 0;
-                for (int j = 1; j <= 11; j++)
-                {
-                    //11bits looks faster than 8 on AMD 4800H, 15 is slower
-                    if (i - j >= kIndexEnd)
-                    {
-                        int kListIm1 = kList[i - j];
-                        if (kListIm1 == kListI + j)
-                        {
-                            int maskIm1 = 1 << kListIm1;
-                            maskI = maskI | maskIm1;
-                            bits++;
-                            imm++;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                i -= imm;
-                parts.Add((maskI, bits, kListI));
-            }
-
-            return parts;
-        }
-
-        protected List<(long, int, int)> getSectionsLong(int[] kList, int kIndexStart, int kIndexEnd)
-        {
-            List<(long, int, int)> parts = new List<(long, int, int)>();
-            for (int i = kIndexStart; i >= kIndexEnd; i--)
-            {
-                int kListI = kList[i];
-                long maskI = 1L << kListI;
-                int bits = 1;
-                int imm = 0;
-                for (int j = 1; j <= 11; j++)
-                {
-                    //11bits looks faster than 8 on AMD 4800H, 15 is slower
-                    if (i - j >= kIndexEnd)
-                    {
-                        int kListIm1 = kList[i - j];
-                        if (kListIm1 == kListI + j)
-                        {
-                            long maskIm1 = 1L << kListIm1;
-                            maskI = maskI | maskIm1;
-                            bits++;
-                            imm++;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                i -= imm;
-                parts.Add((maskI, bits, kListI));
-            }
-
-            return parts;
-        }
-
-
-        protected abstract (V, V) GetMaskInfo(T[] array, int start, int endP1);
-
-        protected abstract int[] GetMaskAsArray(V mask);
 
 
         private void Swap(T[] array, int left, int right)
@@ -303,13 +223,14 @@ namespace BitMaskSorter
         }
 
 
-        public void PartitionStableBitsInt(T[] array, int start, int endP1, int mask, int shiftRight,
+        public void PartitionStableBitsInt(Func<T, int> convert, T[] array, int start, int endP1, int mask,
+            int shiftRight,
             int twoPowerK, T[] aux)
         {
             int[] count = new int[twoPowerK];
             for (int i = start; i < endP1; i++)
             {
-                count[(ConvertToInt(array[i]) & mask) >> shiftRight]++;
+                count[(convert(array[i]) & mask) >> shiftRight]++;
             }
 
 
@@ -323,19 +244,20 @@ namespace BitMaskSorter
             for (int i = start; i < endP1; i++)
             {
                 T element = array[i];
-                aux[count[(ConvertToInt(element) & mask) >> shiftRight]++] = element;
+                aux[count[(convert(element) & mask) >> shiftRight]++] = element;
             }
 
             Array.Copy(aux, 0, array, start, endP1 - start);
         }
 
-        public void PartitionStableBitsLong(T[] array, int start, int endP1, long mask, int shiftRight,
+        public void PartitionStableBitsLong(Func<T, long> convert, T[] array, int start, int endP1, long mask,
+            int shiftRight,
             int twoPowerK, T[] aux)
         {
             int[] count = new int[twoPowerK];
             for (int i = start; i < endP1; i++)
             {
-                count[(ConvertToLong(array[i]) & mask) >> shiftRight]++;
+                count[(convert(array[i]) & mask) >> shiftRight]++;
             }
 
 
@@ -349,225 +271,115 @@ namespace BitMaskSorter
             for (int i = start; i < endP1; i++)
             {
                 T element = array[i];
-                aux[count[(ConvertToLong(element) & mask) >> shiftRight]++] = element;
+                aux[count[(convert(element) & mask) >> shiftRight]++] = element;
             }
 
             Array.Copy(aux, 0, array, start, endP1 - start);
         }
 
 
-        ///
-        /// 
-        protected (int, int) getMaskBitInt(T[] array, int start, int endP1)
-        {
-            int pMask = 0x0000000000000000;
-            int iMask = 0x0000000000000000;
-            for (int i = start; i < endP1; i++)
-            {
-                int e = ConvertToInt(array[i]);
-                pMask = pMask | e;
-                iMask = iMask | (~e);
-            }
-
-            return (pMask, iMask);
-        }
-
-        protected (long, long) getMaskBitLong(T[] array, int start, int endP1)
-        {
-            long pMask = 0x0000000000000000;
-            long iMask = 0x0000000000000000;
-            for (int i = start; i < endP1; i++)
-            {
-                long e = ConvertToLong(array[i]);
-                pMask = pMask | e;
-                iMask = iMask | (~e);
-            }
-
-            return (pMask, iMask);
-        }
-
-        public int[] getMaskAsArrayInt(int mask)
-        {
-            List<int> list = new List<int>();
-            for (int i = GetUpperBit(); i >= 0; i--)
-            {
-                if (((mask >> i) & 1) == 1)
-                {
-                    list.Add(i);
-                }
-            }
-
-            return list.ToArray();
-        }
-
-        public int[] GetMaskAsArrayLong(long mask)
-        {
-            List<int> list = new List<int>();
-            for (int i = GetUpperBit(); i >= 0; i--)
-            {
-                if (((mask >> i) & 1L) == 1L)
-                {
-                    list.Add(i);
-                }
-            }
-
-            return list.ToArray();
-        }
-
-        ////
-        ///
-        /// 
         protected abstract bool IsUnsigned();
 
         protected abstract bool IsIEEE754();
 
-        protected abstract int ConvertToInt(T e);
+        protected abstract Func<T, V> MapToMask();
 
-        protected abstract long ConvertToLong(T e);
-        protected abstract bool MaskedEqZero(T e, V mask);
+        protected abstract MaskInfo<V> GetMaskInfoBuilder();
 
-        protected abstract bool GreaterOrEqZero(T e);
-
-        protected abstract V GetUpperBitMask();
-        protected abstract int GetUpperBit();
-
-        protected abstract V GetMask((V, V) maskInfo);
     }
 
 
     public class RadixBitSorterGenericInt : RadixBitSorterGeneric<int, int>
     {
+        private MaskInfoInt maskInfoInt = new MaskInfoInt();
         protected override bool IsUnsigned() => false;
 
         protected override bool IsIEEE754() => false;
 
-        protected override int ConvertToInt(int e) => e;
-        protected override long ConvertToLong(int e) => throw new NotImplementedException();
+        protected override Func<int, int> MapToMask()
+        {
+            return (e) => e;
+        }
 
-        protected override bool MaskedEqZero(int e, int mask) => (e & mask) == 0;
+        protected override MaskInfo<int> GetMaskInfoBuilder()
+        {
+            return maskInfoInt;
+        }
 
-        protected override bool GreaterOrEqZero(int e) => e >= 0;
-
-        protected override int GetUpperBitMask() => 1 << 31;
-
-        protected override int GetUpperBit() => 31;
-
-        protected override int GetMask((int, int) maskInfo) => maskInfo.Item1 & maskInfo.Item2;
-
-        protected override void PartitionStableBitsX(int[] array, int start, int endP1,
+        protected override void PartitionStableBits(int[] array, int start, int endP1,
             int maskI, int shift, int twoPowerBits,
             int[] aux) =>
-            PartitionStableBitsInt(array, start, endP1, maskI, shift, twoPowerBits, aux);
-
-        protected override List<(int, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd) =>
-            getSectionsInt(kList, kIndexStart, kIndexEnd);
-
-        protected override (int, int) GetMaskInfo(int[] array, int start, int endP1) =>
-            getMaskBitInt(array, start, endP1);
-
-        protected override int[] GetMaskAsArray(int mask) => getMaskAsArrayInt(mask);
+            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, twoPowerBits, aux);
     }
 
     public class RadixBitSorterGenericFloat : RadixBitSorterGeneric<float, int>
     {
+        private MaskInfoInt maskInfoInt = new MaskInfoInt();
+
         protected override bool IsUnsigned() => false;
 
         protected override bool IsIEEE754() => true;
 
-        protected override unsafe long ConvertToLong(float e) => throw new NotImplementedException();
+        protected override unsafe Func<float, int> MapToMask()
+        {
+            return (e) => *(int*)(&e);
+        }
 
-        protected override unsafe int ConvertToInt(float e) => *(int*)(&e);
+        protected override MaskInfo<int> GetMaskInfoBuilder()
+        {
+            return maskInfoInt;
+        }
 
-        protected override bool MaskedEqZero(float e, int mask) => (ConvertToInt(e) & mask) == 0;
-
-        protected override bool GreaterOrEqZero(float e) => ConvertToInt(e) >= 0;
-
-        protected override int GetUpperBitMask() => 1 << 31;
-
-        protected override int GetUpperBit() => 31;
-
-        protected override int GetMask((int, int) maskInfo) => maskInfo.Item1 & maskInfo.Item2;
-
-        protected override void PartitionStableBitsX(float[] array, int start, int endP1, int maskI, int shift,
+        protected override void PartitionStableBits(float[] array, int start, int endP1, int maskI, int shift,
             int twoPowerBits,
             float[] aux) =>
-            PartitionStableBitsInt(array, start, endP1, maskI, shift, twoPowerBits, aux);
-
-
-        protected override List<(int, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd) =>
-            getSectionsInt(kList, kIndexStart, kIndexEnd);
-
-        protected override (int, int) GetMaskInfo(float[] array, int start, int endP1) =>
-            getMaskBitInt(array, start, endP1);
-
-        protected override int[] GetMaskAsArray(int mask) => getMaskAsArrayInt(mask);
+            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, twoPowerBits, aux);
     }
 
 
     public class RadixBitSorterGenericLong : RadixBitSorterGeneric<long, long>
     {
+        private MaskInfoLong maskInfoLong = new MaskInfoLong();
+
         protected override bool IsUnsigned() => false;
 
         protected override bool IsIEEE754() => false;
-        protected override long ConvertToLong(long e) => e;
 
-        protected override int ConvertToInt(long e) => throw new NotImplementedException();
+        protected override Func<long, long> MapToMask() => (e) => e;
 
-        protected override bool MaskedEqZero(long e, long mask) => (e & mask) == 0L;
+        protected override MaskInfo<long> GetMaskInfoBuilder()
+        {
+            return maskInfoLong;
+        }
 
-        protected override bool GreaterOrEqZero(long e) => e >= 0L;
 
-        protected override long GetUpperBitMask() => 1L << 63;
-
-        protected override int GetUpperBit() => 63;
-
-        protected override long GetMask((long, long) maskInfo) => maskInfo.Item1 & maskInfo.Item2;
-
-        protected override void PartitionStableBitsX(long[] array, int start, int endP1,
+        protected override void PartitionStableBits(long[] array, int start, int endP1,
             long maskI, int shift, int twoPowerBits,
             long[] aux) =>
-            PartitionStableBitsLong(array, start, endP1, maskI, shift, twoPowerBits, aux);
-
-        protected override List<(long, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd) =>
-            getSectionsLong(kList, kIndexStart, kIndexEnd);
-
-        protected override (long, long) GetMaskInfo(long[] array, int start, int endP1) =>
-            getMaskBitLong(array, start, endP1);
-
-        protected override int[] GetMaskAsArray(long mask) => GetMaskAsArrayLong(mask);
+            PartitionStableBitsLong(MapToMask(), array, start, endP1, maskI, shift, twoPowerBits, aux);
     }
 
     public class RadixBitSorterGenericDouble : RadixBitSorterGeneric<double, long>
     {
+        private MaskInfoLong maskInfoLong = new MaskInfoLong();
+
         protected override bool IsUnsigned() => false;
 
         protected override bool IsIEEE754() => true;
 
-        protected override unsafe long ConvertToLong(double e) => *(long*)(&e);
+        protected override unsafe Func<double, long> MapToMask()
+        {
+            return (e) => *(long*)(&e);
+        }
 
-        protected override int ConvertToInt(double e) => throw new NotImplementedException();
+        protected override MaskInfo<long> GetMaskInfoBuilder()
+        {
+            return maskInfoLong;
+        }
 
-        protected override bool MaskedEqZero(double e, long mask) => (ConvertToLong(e) & mask) == 0;
-
-        protected override bool GreaterOrEqZero(double e) => ConvertToLong(e) >= 0;
-
-        protected override long GetUpperBitMask() => 1L << 63;
-
-        protected override int GetUpperBit() => 63;
-
-        protected override long GetMask((long, long) maskInfo) => maskInfo.Item1 & maskInfo.Item2;
-
-        protected override void PartitionStableBitsX(double[] array, int start, int endP1,
+        protected override void PartitionStableBits(double[] array, int start, int endP1,
             long maskI, int shift, int twoPowerBits,
             double[] aux) =>
-            PartitionStableBitsLong(array, start, endP1, maskI, shift, twoPowerBits, aux);
-
-        protected override List<(long, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd) =>
-            getSectionsLong(kList, kIndexStart, kIndexEnd);
-
-        protected override (long, long) GetMaskInfo(double[] array, int start, int endP1) =>
-            getMaskBitLong(array, start, endP1);
-
-        protected override int[] GetMaskAsArray(long mask) => GetMaskAsArrayLong(mask);
+            PartitionStableBitsLong(MapToMask(), array, start, endP1, maskI, shift, twoPowerBits, aux);
     }
 }

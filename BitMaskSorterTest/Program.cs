@@ -59,15 +59,12 @@ for (int iteration = 0; iteration < iterations; iteration++)
             Console.WriteLine("Arrays are not equal.");
 
     Console.WriteLine();
-
 }
 
 Console.WriteLine("AVG<int> C#                       time: {0} ms", totalCSharp / iterations);
 Console.WriteLine("AVG<int> RadixBitSorterInt        time: {0} ms", totalRadix1 / iterations);
 Console.WriteLine("AVG<int> RadixBitSorterGenericInt time: {0} ms", totalRadix2 / iterations);
 Console.ReadKey();
-
-
 
 
 totalCSharp = 0;
@@ -115,7 +112,6 @@ for (int iteration = 0; iteration < iterations; iteration++)
 Console.WriteLine("AVG<long>  C#                        time: {0} ms", totalCSharp / iterations);
 Console.WriteLine("AVG<long>  RadixBitSorterGenericLong time: {0} ms", totalRadix2 / iterations);
 Console.ReadKey();
-
 
 
 totalCSharp = 0;

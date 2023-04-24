@@ -4,7 +4,7 @@ namespace BitMaskSorter
 {
     internal class BitSorterUtils
     {
-        public static (int, int) GetMaskInfo(int[] array, int start, int endP1)
+        public static (int, int) CalculateMaskParts(int[] array, int start, int endP1)
         {
             int pMask = 0x00000000;
             int iMask = 0x00000000;
