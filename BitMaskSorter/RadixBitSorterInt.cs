@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using static BitMaskSorter.BitSorterUtils;
 using static BitMaskSorter.IntSorterUtils;
 
@@ -77,33 +79,13 @@ namespace BitMaskSorter
         private static void RadixSort(int[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
             int[] aux)
         {
-            for (int i = kIndexStart; i >= kIndexEnd; i--)
+            MaskInfoInt maskInfo = new MaskInfoInt();
+            List<(int, int, int)> sections = maskInfo.GetSections(kList, kIndexStart, kIndexEnd);
+            foreach (var section in sections)
             {
-                int kListI = kList[i];
-                int maskI = 1 << kListI;
-                int bits = 1;
-                int imm = 0;
-                for (int j = 1; j <= 11; j++)
-                {
-                    //11bits looks faster than 8 on AMD 4800H, 15 is slower
-                    if (i - j >= kIndexEnd)
-                    {
-                        int kListIm1 = kList[i - j];
-                        if (kListIm1 == kListI + j)
-                        {
-                            int maskIm1 = 1 << kListIm1;
-                            maskI = maskI | maskIm1;
-                            bits++;
-                            imm++;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                i -= imm;
+                int maskI = section.Item1;
+                int bits = section.Item2;
+                int shift = section.Item3;
                 if (bits == 1)
                 {
                     IntSorterUtils.PartitionStable(array, start, endP1, maskI, aux);
@@ -111,13 +93,13 @@ namespace BitMaskSorter
                 else
                 {
                     int twoPowerBits = 1 << bits;
-                    if (kListI == 0)
+                    if (shift == 0)
                     {
                         PartitionStableLastBits(array, start, endP1, maskI, twoPowerBits, aux);
                     }
                     else
                     {
-                        PartitionStableOneGroupBits(array, start, endP1, maskI, kListI, twoPowerBits, aux);
+                        PartitionStableOneGroupBits(array, start, endP1, maskI, shift, twoPowerBits, aux);
                     }
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace BitMaskSorter
@@ -21,17 +22,19 @@ namespace BitMaskSorter
             iMask = parts.Item2;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MaskedEqZero<T>(Func<T, int> convert, T e, int mask)
         {
             return (convert(e) & mask) == 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GreaterOrEqZero<T>(Func<T, int> convert, T e)
         {
             return (convert(e) >= 0);
         }
 
-        public (int, int) CalculateMaskParts<T>(Func<T, int> convert, T[] array, int start, int endP1)
+        public (int, int) CalculateMask<T>(Func<T, int> convert, T[] array, int start, int endP1)
         {
             int pMask = 0x0000000000000000;
             int iMask = 0x0000000000000000;
@@ -68,16 +71,14 @@ namespace BitMaskSorter
                 int maskI = 1 << kListI;
                 int bits = 1;
                 int imm = 0;
-                for (int j = 1; j <= 11; j++)
+                for (int j = 1; j <= SorterConstants.MAX_BITS_RADIX_SORT - 1; j++)
                 {
-                    //11bits looks faster than 8 on AMD 4800H, 15 is slower
                     if (i - j >= kIndexEnd)
                     {
                         int kListIm1 = kList[i - j];
                         if (kListIm1 == kListI + j)
                         {
-                            int maskIm1 = 1 << kListIm1;
-                            maskI = maskI | maskIm1;
+                            maskI = maskI | 1 << kListIm1;
                             bits++;
                             imm++;
                         }

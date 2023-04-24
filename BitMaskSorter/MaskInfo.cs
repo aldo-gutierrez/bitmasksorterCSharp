@@ -16,10 +16,11 @@ namespace BitMaskSorter
 
         bool GreaterOrEqZero<T>(Func<T, M> convert, T e);
 
-        (M, M) CalculateMaskParts<T>(Func<T, M> convert, T[] array, int start, int endP1);
+        (M, M) CalculateMask<T>(Func<T, M> convert, T[] array, int start, int endP1);
 
         int[] GetMaskAsArray(M mask);
 
         List<(M, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd);
+
     }
 }

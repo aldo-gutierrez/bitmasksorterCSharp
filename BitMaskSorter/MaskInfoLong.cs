@@ -31,7 +31,7 @@ namespace BitMaskSorter
             return (convert(e) >= 0L);
         }
 
-        public (long, long) CalculateMaskParts<T>(Func<T, long> convert, T[] array, int start, int endP1)
+        public (long, long) CalculateMask<T>(Func<T, long> convert, T[] array, int start, int endP1)
         {
             long pMask = 0x0000000000000000;
             long iMask = 0x0000000000000000;
@@ -68,16 +68,14 @@ namespace BitMaskSorter
                 long maskI = 1L << kListI;
                 int bits = 1;
                 int imm = 0;
-                for (int j = 1; j <= 11; j++)
+                for (int j = 1; j <= SorterConstants.MAX_BITS_RADIX_SORT - 1; j++)
                 {
-                    //11bits looks faster than 8 on AMD 4800H, 15 is slower
                     if (i - j >= kIndexEnd)
                     {
                         int kListIm1 = kList[i - j];
                         if (kListIm1 == kListI + j)
                         {
-                            long maskIm1 = 1L << kListIm1;
-                            maskI = maskI | maskIm1;
+                            maskI = maskI | 1L << kListIm1;
                             bits++;
                             imm++;
                         }

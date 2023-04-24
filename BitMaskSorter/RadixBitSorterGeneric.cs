@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace BitMaskSorter
 {
@@ -16,7 +17,7 @@ namespace BitMaskSorter
             }
 
             MaskInfo<V> maskInfo = GetMaskInfoBuilder();
-            maskInfo.SetMaskParts(maskInfo.CalculateMaskParts(MapToMask(), array, start, endP1));
+            maskInfo.SetMaskParts(maskInfo.CalculateMask(MapToMask(), array, start, endP1));
             V mask = maskInfo.GetMask();
             int[] kList = maskInfo.GetMaskAsArray(mask);
             if (kList.Length == 0)
@@ -37,7 +38,7 @@ namespace BitMaskSorter
                 if (n1 > 1)
                 {
                     //sort negative numbers
-                    maskInfo.SetMaskParts(maskInfo.CalculateMaskParts(MapToMask(), array, start, finalLeft));
+                    maskInfo.SetMaskParts(maskInfo.CalculateMask(MapToMask(), array, start, finalLeft));
                     mask = maskInfo.GetMask();
                     kList = maskInfo.GetMaskAsArray(mask);
                     if (kList.Length > 0)
@@ -53,7 +54,7 @@ namespace BitMaskSorter
                 if (n2 > 1)
                 {
                     //sort positive numbers
-                    maskInfo.SetMaskParts(maskInfo.CalculateMaskParts(MapToMask(), array, finalLeft, endP1));
+                    maskInfo.SetMaskParts(maskInfo.CalculateMask(MapToMask(), array, finalLeft, endP1));
                     mask = maskInfo.GetMask();
                     kList = maskInfo.GetMaskAsArray(mask);
                     if (kList.Length > 0)
@@ -296,6 +297,7 @@ namespace BitMaskSorter
 
         protected override bool IsIEEE754() => false;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override Func<int, int> MapToMask()
         {
             return (e) => e;
@@ -320,6 +322,7 @@ namespace BitMaskSorter
 
         protected override bool IsIEEE754() => true;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override unsafe Func<float, int> MapToMask()
         {
             return (e) => *(int*)(&e);
@@ -345,6 +348,7 @@ namespace BitMaskSorter
 
         protected override bool IsIEEE754() => false;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override Func<long, long> MapToMask() => (e) => e;
 
         protected override MaskInfo<long> GetMaskInfoBuilder()
@@ -367,6 +371,7 @@ namespace BitMaskSorter
 
         protected override bool IsIEEE754() => true;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override unsafe Func<double, long> MapToMask()
         {
             return (e) => *(long*)(&e);
@@ -382,4 +387,54 @@ namespace BitMaskSorter
             double[] aux) =>
             PartitionStableBitsLong(MapToMask(), array, start, endP1, maskI, shift, twoPowerBits, aux);
     }
+
+
+    public class RadixBitSorterGenericShort : RadixBitSorterGeneric<short, int>
+    {
+        private MaskInfoInt maskInfoInt = new MaskInfoInt();
+        protected override bool IsUnsigned() => false;
+
+        protected override bool IsIEEE754() => false;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected override Func<short, int> MapToMask()
+        {
+            return (e) => e;
+        }
+
+        protected override MaskInfo<int> GetMaskInfoBuilder()
+        {
+            return maskInfoInt;
+        }
+
+        protected override void PartitionStableBits(short[] array, int start, int endP1,
+            int maskI, int shift, int twoPowerBits,
+            short[] aux) =>
+            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, twoPowerBits, aux);
+    }
+
+    public class RadixBitSorterGenericUShort : RadixBitSorterGeneric<ushort, int>
+    {
+        private MaskInfoInt maskInfoInt = new MaskInfoInt();
+        protected override bool IsUnsigned() => true;
+
+        protected override bool IsIEEE754() => false;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected override Func<ushort, int> MapToMask()
+        {
+            return (e) => e;
+        }
+
+        protected override MaskInfo<int> GetMaskInfoBuilder()
+        {
+            return maskInfoInt;
+        }
+
+        protected override void PartitionStableBits(ushort[] array, int start, int endP1,
+            int maskI, int shift, int twoPowerBits,
+            ushort[] aux) =>
+            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, twoPowerBits, aux);
+    }
+
 }
