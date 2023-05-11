@@ -1,25 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace BitMaskSorter
 {
-    public abstract class RadixBitSorterGeneric<T, V>
+    public abstract class RadixBitSorterGeneric<T, TM>
         where T : struct, IComparable, IComparable<T>, IConvertible, IEquatable<T>, IFormattable
-        where V : struct, IComparable, IComparable<V>, IConvertible, IEquatable<V>, IFormattable
+        where TM : struct, IComparable, IComparable<TM>, IConvertible, IEquatable<TM>, IFormattable
     {
-        public void sort(T[] array, int start, int endP1)
+        public void Sort(T[] array, int start, int endP1)
         {
-            int n = endP1 - start;
+            var n = endP1 - start;
             if (n < 2)
             {
                 return;
             }
 
-            MaskInfo<V> maskInfo = GetMaskInfoBuilder();
+            var maskInfo = GetMaskInfoBuilder();
             maskInfo.SetMaskParts(maskInfo.CalculateMask(MapToMask(), array, start, endP1));
-            V mask = maskInfo.GetMask();
-            int[] kList = maskInfo.GetMaskAsArray(mask);
+            var mask = maskInfo.GetMask();
+            var kList = maskInfo.GetMaskAsArray(mask);
             if (kList.Length == 0)
             {
                 return;
@@ -28,12 +27,12 @@ namespace BitMaskSorter
             if (kList[0] == maskInfo.GetUpperBit())
             {
                 //there are negative numbers and positive numbers
-                int finalLeft = IsUnsigned()
-                    ? PartitionNotStable(array, start, endP1, (e) => maskInfo.GreaterOrEqZero(MapToMask(), e))
+                var finalLeft = IsUnsigned()
+                    ? PartitionNotStable(array, start, endP1, e => maskInfo.GreaterOrEqZero(MapToMask(), e))
                     : PartitionReverseNotStable(array, start, endP1, e => maskInfo.GreaterOrEqZero(MapToMask(), e));
 
-                int n1 = finalLeft - start;
-                int n2 = endP1 - finalLeft;
+                var n1 = finalLeft - start;
+                var n2 = endP1 - finalLeft;
 
                 if (n1 > 1)
                 {
@@ -68,7 +67,7 @@ namespace BitMaskSorter
                 RadixSort(array, start, endP1, kList);
                 if (IsIEEE754())
                 {
-                    V sortMask = maskInfo.GetUpperBitMask();
+                    var sortMask = maskInfo.GetUpperBitMask();
                     if (!maskInfo.MaskedEqZero(MapToMask(), array[0], sortMask))
                     {
                         Reverse(array, start, endP1);
@@ -79,7 +78,7 @@ namespace BitMaskSorter
 
         private void RadixSort(T[] array, int start, int endP1, int[] kList)
         {
-            T[] aux = new T[endP1 - start];
+            var aux = new T[endP1 - start];
             RadixSort(array, start, endP1, kList, kList.Length - 1, 0, aux);
         }
 
@@ -87,43 +86,41 @@ namespace BitMaskSorter
         private void RadixSort(T[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
             T[] aux)
         {
-            MaskInfo<V> maskInfo = GetMaskInfoBuilder();
-            List<(V, int, int)> sections = maskInfo.GetSections(kList, kIndexStart, kIndexEnd);
+            var maskInfo = GetMaskInfoBuilder();
+            var sections = maskInfo.GetSections(kList, kIndexStart, kIndexEnd);
             foreach (var section in sections)
             {
-                V maskI = section.Item1;
-                int bits = section.Item2;
-                int shift = section.Item3;
+                var maskI = section.Item1;
+                var bits = section.Item2;
+                var shift = section.Item3;
                 if (bits == 1)
                 {
                     PartitionStable(array, start, endP1, e => maskInfo.MaskedEqZero(MapToMask(), e, maskI), aux);
                 }
                 else
                 {
-                    int twoPowerBits = 1 << bits;
+                    var twoPowerBits = 1 << bits;
                     PartitionStableBits(array, start, endP1, maskI, shift, twoPowerBits, aux);
                 }
             }
         }
 
-        protected abstract void PartitionStableBits(T[] array, int start, int endP1, V maskI, int shift,
+        protected abstract void PartitionStableBits(T[] array, int start, int endP1, TM maskI, int shift,
             int twoPowerBits, T[] aux);
 
 
         private void Swap(T[] array, int left, int right)
         {
-            T aux = array[left];
-            array[left] = array[right];
-            array[right] = aux;
+            (array[left], array[right]) = (array[right], array[left]);
         }
 
 
         private void Reverse(T[] array, int start, int endP1)
         {
-            int length = endP1 - start;
-            int ld2 = length / 2;
-            int end = endP1 - 1;
-            for (int i = 0; i < ld2; ++i)
+            var length = endP1 - start;
+            var ld2 = length / 2;
+            var end = endP1 - 1;
+            for (var i = 0; i < ld2; ++i)
             {
                 Swap(array, start + i, end - i);
             }
@@ -132,12 +129,12 @@ namespace BitMaskSorter
 
         public int PartitionNotStable(T[] array, int start, int endP1, Func<T, bool> fMaskEqual)
         {
-            int left = start;
-            int right = endP1 - 1;
+            var left = start;
+            var right = endP1 - 1;
 
             while (left <= right)
             {
-                T element = array[left];
+                var element = array[left];
                 if (fMaskEqual(element))
                 {
                     left++;
@@ -167,12 +164,12 @@ namespace BitMaskSorter
 
         public int PartitionReverseNotStable(T[] array, int start, int endP1, Func<T, bool> eMaskedEq0)
         {
-            int left = start;
-            int right = endP1 - 1;
+            var left = start;
+            var right = endP1 - 1;
 
             while (left <= right)
             {
-                T element = array[left];
+                var element = array[left];
                 if (eMaskedEq0(element))
                 {
                     while (left <= right)
@@ -202,11 +199,11 @@ namespace BitMaskSorter
 
         public int PartitionStable(T[] array, int start, int endP1, Func<T, bool> eAndMaskEq0, T[] aux)
         {
-            int left = start;
-            int right = 0;
-            for (int i = start; i < endP1; i++)
+            var left = start;
+            var right = 0;
+            for (var i = start; i < endP1; i++)
             {
-                T element = array[i];
+                var element = array[i];
                 if (eAndMaskEq0(element))
                 {
                     array[left] = element;
@@ -228,8 +225,8 @@ namespace BitMaskSorter
             int shiftRight,
             int twoPowerK, T[] aux)
         {
-            int[] count = new int[twoPowerK];
-            for (int i = start; i < endP1; i++)
+            var count = new int[twoPowerK];
+            for (var i = start; i < endP1; i++)
             {
                 count[(convert(array[i]) & mask) >> shiftRight]++;
             }
@@ -237,14 +234,14 @@ namespace BitMaskSorter
 
             for (int i = 0, sum = 0; i < twoPowerK; ++i)
             {
-                int countI = count[i];
+                var countI = count[i];
                 count[i] = sum;
                 sum += countI;
             }
 
-            for (int i = start; i < endP1; i++)
+            for (var i = start; i < endP1; i++)
             {
-                T element = array[i];
+                var element = array[i];
                 aux[count[(convert(element) & mask) >> shiftRight]++] = element;
             }
 
@@ -255,8 +252,8 @@ namespace BitMaskSorter
             int shiftRight,
             int twoPowerK, T[] aux)
         {
-            int[] count = new int[twoPowerK];
-            for (int i = start; i < endP1; i++)
+            var count = new int[twoPowerK];
+            for (var i = start; i < endP1; i++)
             {
                 count[(convert(array[i]) & mask) >> shiftRight]++;
             }
@@ -264,14 +261,14 @@ namespace BitMaskSorter
 
             for (int i = 0, sum = 0; i < twoPowerK; ++i)
             {
-                int countI = count[i];
+                var countI = count[i];
                 count[i] = sum;
                 sum += countI;
             }
 
-            for (int i = start; i < endP1; i++)
+            for (var i = start; i < endP1; i++)
             {
-                T element = array[i];
+                var element = array[i];
                 aux[count[(convert(element) & mask) >> shiftRight]++] = element;
             }
 
@@ -283,16 +280,16 @@ namespace BitMaskSorter
 
         protected abstract bool IsIEEE754();
 
-        protected abstract Func<T, V> MapToMask();
+        protected abstract Func<T, TM> MapToMask();
 
-        protected abstract MaskInfo<V> GetMaskInfoBuilder();
+        protected abstract IMaskInfo<TM> GetMaskInfoBuilder();
 
     }
 
 
     public class RadixBitSorterGenericInt : RadixBitSorterGeneric<int, int>
     {
-        private MaskInfoInt maskInfoInt = new MaskInfoInt();
+        private readonly MaskInfoInt _maskInfoInt = new MaskInfoInt();
         protected override bool IsUnsigned() => false;
 
         protected override bool IsIEEE754() => false;
@@ -300,12 +297,12 @@ namespace BitMaskSorter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override Func<int, int> MapToMask()
         {
-            return (e) => e;
+            return e => e;
         }
 
-        protected override MaskInfo<int> GetMaskInfoBuilder()
+        protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
-            return maskInfoInt;
+            return _maskInfoInt;
         }
 
         protected override void PartitionStableBits(int[] array, int start, int endP1,
@@ -316,7 +313,7 @@ namespace BitMaskSorter
 
     public class RadixBitSorterGenericFloat : RadixBitSorterGeneric<float, int>
     {
-        private MaskInfoInt maskInfoInt = new MaskInfoInt();
+        private readonly MaskInfoInt _maskInfoInt = new MaskInfoInt();
 
         protected override bool IsUnsigned() => false;
 
@@ -325,12 +322,12 @@ namespace BitMaskSorter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override unsafe Func<float, int> MapToMask()
         {
-            return (e) => *(int*)(&e);
+            return e => *(int*)&e;
         }
 
-        protected override MaskInfo<int> GetMaskInfoBuilder()
+        protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
-            return maskInfoInt;
+            return _maskInfoInt;
         }
 
         protected override void PartitionStableBits(float[] array, int start, int endP1, int maskI, int shift,
@@ -342,18 +339,18 @@ namespace BitMaskSorter
 
     public class RadixBitSorterGenericLong : RadixBitSorterGeneric<long, long>
     {
-        private MaskInfoLong maskInfoLong = new MaskInfoLong();
+        private readonly MaskInfoLong _maskInfoLong = new MaskInfoLong();
 
         protected override bool IsUnsigned() => false;
 
         protected override bool IsIEEE754() => false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override Func<long, long> MapToMask() => (e) => e;
+        protected override Func<long, long> MapToMask() => e => e;
 
-        protected override MaskInfo<long> GetMaskInfoBuilder()
+        protected override IMaskInfo<long> GetMaskInfoBuilder()
         {
-            return maskInfoLong;
+            return _maskInfoLong;
         }
 
 
@@ -365,7 +362,7 @@ namespace BitMaskSorter
 
     public class RadixBitSorterGenericDouble : RadixBitSorterGeneric<double, long>
     {
-        private MaskInfoLong maskInfoLong = new MaskInfoLong();
+        private readonly MaskInfoLong _maskInfoLong = new MaskInfoLong();
 
         protected override bool IsUnsigned() => false;
 
@@ -374,12 +371,12 @@ namespace BitMaskSorter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override unsafe Func<double, long> MapToMask()
         {
-            return (e) => *(long*)(&e);
+            return e => *(long*)(&e);
         }
 
-        protected override MaskInfo<long> GetMaskInfoBuilder()
+        protected override IMaskInfo<long> GetMaskInfoBuilder()
         {
-            return maskInfoLong;
+            return _maskInfoLong;
         }
 
         protected override void PartitionStableBits(double[] array, int start, int endP1,
@@ -391,7 +388,7 @@ namespace BitMaskSorter
 
     public class RadixBitSorterGenericShort : RadixBitSorterGeneric<short, int>
     {
-        private MaskInfoInt maskInfoInt = new MaskInfoInt();
+        private readonly MaskInfoInt _maskInfoInt = new MaskInfoInt();
         protected override bool IsUnsigned() => false;
 
         protected override bool IsIEEE754() => false;
@@ -399,12 +396,12 @@ namespace BitMaskSorter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override Func<short, int> MapToMask()
         {
-            return (e) => e;
+            return e => e;
         }
 
-        protected override MaskInfo<int> GetMaskInfoBuilder()
+        protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
-            return maskInfoInt;
+            return _maskInfoInt;
         }
 
         protected override void PartitionStableBits(short[] array, int start, int endP1,
@@ -415,7 +412,7 @@ namespace BitMaskSorter
 
     public class RadixBitSorterGenericUShort : RadixBitSorterGeneric<ushort, int>
     {
-        private MaskInfoInt maskInfoInt = new MaskInfoInt();
+        private readonly MaskInfoInt _maskInfoInt = new MaskInfoInt();
         protected override bool IsUnsigned() => true;
 
         protected override bool IsIEEE754() => false;
@@ -423,12 +420,12 @@ namespace BitMaskSorter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override Func<ushort, int> MapToMask()
         {
-            return (e) => e;
+            return e => e;
         }
 
-        protected override MaskInfo<int> GetMaskInfoBuilder()
+        protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
-            return maskInfoInt;
+            return _maskInfoInt;
         }
 
         protected override void PartitionStableBits(ushort[] array, int start, int endP1,

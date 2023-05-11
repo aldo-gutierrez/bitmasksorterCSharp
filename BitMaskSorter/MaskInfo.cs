@@ -3,24 +3,24 @@ using System.Collections.Generic;
 
 namespace BitMaskSorter
 {
-    public interface MaskInfo<M>
-        where M : struct, IComparable, IComparable<M>, IConvertible, IEquatable<M>, IFormattable
+    public interface IMaskInfo<TM>
+        where TM : struct, IComparable, IComparable<TM>, IConvertible, IEquatable<TM>, IFormattable
     {
-        M GetUpperBitMask();
+        TM GetUpperBitMask();
         int GetUpperBit();
 
-        M GetMask();
-        void SetMaskParts((M, M) parts);
+        TM GetMask();
+        void SetMaskParts((TM, TM) parts);
 
-        bool MaskedEqZero<T>(Func<T, M> convert, T e, M mask);
+        bool MaskedEqZero<T>(Func<T, TM> convert, T e, TM mask);
 
-        bool GreaterOrEqZero<T>(Func<T, M> convert, T e);
+        bool GreaterOrEqZero<T>(Func<T, TM> convert, T e);
 
-        (M, M) CalculateMask<T>(Func<T, M> convert, T[] array, int start, int endP1);
+        (TM, TM) CalculateMask<T>(Func<T, TM> convert, T[] array, int start, int endP1);
 
-        int[] GetMaskAsArray(M mask);
+        int[] GetMaskAsArray(TM mask);
 
-        List<(M, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd);
+        List<(TM, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd);
 
     }
 }

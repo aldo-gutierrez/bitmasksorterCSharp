@@ -2,17 +2,17 @@
 
 namespace BitMaskSorter
 {
-    internal class BitSorterUtils
+    internal static class BitSorterUtils
     {
         public static (int, int) CalculateMaskParts(int[] array, int start, int endP1)
         {
-            int pMask = 0x00000000;
-            int iMask = 0x00000000;
-            for (int i = start; i < endP1; i++)
+            var pMask = 0x00000000;
+            var iMask = 0x00000000;
+            for (var i = start; i < endP1; i++)
             {
-                int e = array[i];
+                var e = array[i];
                 pMask = pMask | e;
-                iMask = iMask | (~e);
+                iMask = iMask | ~e;
             }
 
             return (pMask, iMask);
@@ -20,8 +20,8 @@ namespace BitMaskSorter
 
         public static int[] GetMaskAsArray(int mask)
         {
-            List<int> list = new List<int>();
-            for (int i = 31; i >= 0; i--)
+            var list = new List<int>();
+            for (var i = 31; i >= 0; i--)
             {
                 if (((mask >> i) & 1) == 1)
                 {

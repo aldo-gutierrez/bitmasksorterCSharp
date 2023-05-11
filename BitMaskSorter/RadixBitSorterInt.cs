@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using static BitMaskSorter.BitSorterUtils;
+﻿using static BitMaskSorter.BitSorterUtils;
 using static BitMaskSorter.IntSorterUtils;
 
 namespace BitMaskSorter
@@ -13,17 +10,17 @@ namespace BitMaskSorter
             return false;
         }
 
-        public void sort(int[] array, int start, int endP1)
+        public void Sort(int[] array, int start, int endP1)
         {
-            int n = endP1 - start;
+            var n = endP1 - start;
             if (n < 2)
             {
                 return;
             }
 
             var maskParts = CalculateMaskParts(array, start, endP1);
-            int mask = maskParts.Item1 & maskParts.Item2;
-            int[] kList = GetMaskAsArray(mask);
+            var mask = maskParts.Item1 & maskParts.Item2;
+            var kList = GetMaskAsArray(mask);
             if (kList.Length == 0)
             {
                 return;
@@ -32,12 +29,12 @@ namespace BitMaskSorter
             if (kList[0] == 31)
             {
                 //there are negative numbers and positive numbers
-                int sortMask = 1 << kList[0];
-                int finalLeft = IsUnsigned()
-                    ? IntSorterUtils.PartitionNotStable(array, start, endP1, sortMask)
-                    : IntSorterUtils.PartitionReverseNotStable(array, start, endP1, sortMask);
-                int n1 = finalLeft - start;
-                int n2 = endP1 - finalLeft;
+                var sortMask = 1 << kList[0];
+                var finalLeft = IsUnsigned()
+                    ? PartitionNotStable(array, start, endP1, sortMask)
+                    : PartitionReverseNotStable(array, start, endP1, sortMask);
+                var n1 = finalLeft - start;
+                var n2 = endP1 - finalLeft;
 
                 if (n1 > 1)
                 {
@@ -71,7 +68,7 @@ namespace BitMaskSorter
 
         private void RadixSort(int[] array, int start, int endP1, int[] kList)
         {
-            int[] aux = new int[endP1 - start];
+            var aux = new int[endP1 - start];
             RadixSort(array, start, endP1, kList, kList.Length - 1, 0, aux);
         }
 
@@ -79,20 +76,20 @@ namespace BitMaskSorter
         private static void RadixSort(int[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
             int[] aux)
         {
-            MaskInfoInt maskInfo = new MaskInfoInt();
-            List<(int, int, int)> sections = maskInfo.GetSections(kList, kIndexStart, kIndexEnd);
+            var maskInfo = new MaskInfoInt();
+            var sections = maskInfo.GetSections(kList, kIndexStart, kIndexEnd);
             foreach (var section in sections)
             {
-                int maskI = section.Item1;
-                int bits = section.Item2;
-                int shift = section.Item3;
+                var maskI = section.Item1;
+                var bits = section.Item2;
+                var shift = section.Item3;
                 if (bits == 1)
                 {
-                    IntSorterUtils.PartitionStable(array, start, endP1, maskI, aux);
+                    PartitionStable(array, start, endP1, maskI, aux);
                 }
                 else
                 {
-                    int twoPowerBits = 1 << bits;
+                    var twoPowerBits = 1 << bits;
                     if (shift == 0)
                     {
                         PartitionStableLastBits(array, start, endP1, maskI, twoPowerBits, aux);

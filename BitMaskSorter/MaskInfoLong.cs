@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 namespace BitMaskSorter
 {
-    public class MaskInfoLong : MaskInfo<long>
+    public class MaskInfoLong : IMaskInfo<long>
     {
-        private long pMask;
-        private long iMask;
+        private long _pMask;
+        private long _iMask;
 
         public long GetUpperBitMask() => 1L << 63;
 
         public int GetUpperBit() => 63;
 
-        public long GetMask() => pMask & iMask;
+        public long GetMask() => _pMask & _iMask;
 
         public void SetMaskParts((long, long) parts)
         {
-            pMask = parts.Item1;
-            iMask = parts.Item2;
+            _pMask = parts.Item1;
+            _iMask = parts.Item2;
         }
 
 
@@ -28,18 +28,18 @@ namespace BitMaskSorter
 
         public bool GreaterOrEqZero<T>(Func<T, long> convert, T e)
         {
-            return (convert(e) >= 0L);
+            return convert(e) >= 0L;
         }
 
         public (long, long) CalculateMask<T>(Func<T, long> convert, T[] array, int start, int endP1)
         {
             long pMask = 0x0000000000000000;
             long iMask = 0x0000000000000000;
-            for (int i = start; i < endP1; i++)
+            for (var i = start; i < endP1; i++)
             {
-                long e = convert(array[i]);
+                var e = convert(array[i]);
                 pMask = pMask | e;
-                iMask = iMask | (~e);
+                iMask = iMask | ~e;
             }
 
             return (pMask, iMask);
@@ -47,8 +47,8 @@ namespace BitMaskSorter
 
         public int[] GetMaskAsArray(long mask)
         {
-            List<int> list = new List<int>();
-            for (int i = GetUpperBit(); i >= 0; i--)
+            var list = new List<int>();
+            for (var i = GetUpperBit(); i >= 0; i--)
             {
                 if (((mask >> i) & 1L) == 1L)
                 {
@@ -61,18 +61,18 @@ namespace BitMaskSorter
 
         public List<(long, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd)
         {
-            List<(long, int, int)> parts = new List<(long, int, int)>();
-            for (int i = kIndexStart; i >= kIndexEnd; i--)
+            var parts = new List<(long, int, int)>();
+            for (var i = kIndexStart; i >= kIndexEnd; i--)
             {
-                int kListI = kList[i];
-                long maskI = 1L << kListI;
-                int bits = 1;
-                int imm = 0;
-                for (int j = 1; j <= SorterConstants.MAX_BITS_RADIX_SORT - 1; j++)
+                var kListI = kList[i];
+                var maskI = 1L << kListI;
+                var bits = 1;
+                var imm = 0;
+                for (var j = 1; j <= SorterConstants.MaxBitsRadixSort - 1; j++)
                 {
                     if (i - j >= kIndexEnd)
                     {
-                        int kListIm1 = kList[i - j];
+                        var kListIm1 = kList[i - j];
                         if (kListIm1 == kListI + j)
                         {
                             maskI = maskI | 1L << kListIm1;

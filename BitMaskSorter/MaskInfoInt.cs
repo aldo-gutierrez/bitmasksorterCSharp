@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace BitMaskSorter
 {
-    internal class MaskInfoInt : MaskInfo<int>
+    internal class MaskInfoInt : IMaskInfo<int>
     {
-        private int pMask;
-        private int iMask;
+        private int _pMask;
+        private int _iMask;
 
         public int GetUpperBitMask() => 1 << 31;
 
         public int GetUpperBit() => 31;
 
-        public int GetMask() => pMask & iMask;
+        public int GetMask() => _pMask & _iMask;
 
         public void SetMaskParts((int, int) parts)
         {
-            pMask = parts.Item1;
-            iMask = parts.Item2;
+            _pMask = parts.Item1;
+            _iMask = parts.Item2;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -31,18 +30,18 @@ namespace BitMaskSorter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GreaterOrEqZero<T>(Func<T, int> convert, T e)
         {
-            return (convert(e) >= 0);
+            return convert(e) >= 0;
         }
 
         public (int, int) CalculateMask<T>(Func<T, int> convert, T[] array, int start, int endP1)
         {
-            int pMask = 0x0000000000000000;
-            int iMask = 0x0000000000000000;
-            for (int i = start; i < endP1; i++)
+            var pMask = 0x0000000000000000;
+            var iMask = 0x0000000000000000;
+            for (var i = start; i < endP1; i++)
             {
-                int e = convert(array[i]);
+                var e = convert(array[i]);
                 pMask = pMask | e;
-                iMask = iMask | (~e);
+                iMask = iMask | ~e;
             }
 
             return (pMask, iMask);
@@ -50,8 +49,8 @@ namespace BitMaskSorter
 
         public int[] GetMaskAsArray(int mask)
         {
-            List<int> list = new List<int>();
-            for (int i = GetUpperBit(); i >= 0; i--)
+            var list = new List<int>();
+            for (var i = GetUpperBit(); i >= 0; i--)
             {
                 if (((mask >> i) & 1) == 1)
                 {
@@ -64,18 +63,18 @@ namespace BitMaskSorter
 
         public List<(int, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd)
         {
-            List<(int, int, int)> parts = new List<(int, int, int)>();
-            for (int i = kIndexStart; i >= kIndexEnd; i--)
+            var parts = new List<(int, int, int)>();
+            for (var i = kIndexStart; i >= kIndexEnd; i--)
             {
-                int kListI = kList[i];
-                int maskI = 1 << kListI;
-                int bits = 1;
-                int imm = 0;
-                for (int j = 1; j <= SorterConstants.MAX_BITS_RADIX_SORT - 1; j++)
+                var kListI = kList[i];
+                var maskI = 1 << kListI;
+                var bits = 1;
+                var imm = 0;
+                for (var j = 1; j <= SorterConstants.MaxBitsRadixSort - 1; j++)
                 {
                     if (i - j >= kIndexEnd)
                     {
-                        int kListIm1 = kList[i - j];
+                        var kListIm1 = kList[i - j];
                         if (kListIm1 == kListI + j)
                         {
                             maskI = maskI | 1 << kListIm1;
