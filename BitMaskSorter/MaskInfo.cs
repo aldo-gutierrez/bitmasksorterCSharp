@@ -20,7 +20,7 @@ namespace BitMaskSorter
 
         int[] GetMaskAsArray(TM mask);
 
-        List<(TM, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd);
+        List<(TM, int, int)> GetSections(int[] bList, int bListStart, int bListEnd);
 
     }
 }

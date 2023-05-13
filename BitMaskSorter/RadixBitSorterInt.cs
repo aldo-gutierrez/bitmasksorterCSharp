@@ -20,16 +20,16 @@ namespace BitMaskSorter
 
             var maskParts = CalculateMaskParts(array, start, endP1);
             var mask = maskParts.Item1 & maskParts.Item2;
-            var kList = GetMaskAsArray(mask);
-            if (kList.Length == 0)
+            var bList = GetMaskAsArray(mask);
+            if (bList.Length == 0)
             {
                 return;
             }
 
-            if (kList[0] == 31)
+            if (bList[0] == 31)
             {
                 //there are negative numbers and positive numbers
-                var sortMask = 1 << kList[0];
+                var sortMask = 1 << bList[0];
                 var finalLeft = IsUnsigned()
                     ? PartitionNotStable(array, start, endP1, sortMask)
                     : PartitionReverseNotStable(array, start, endP1, sortMask);
@@ -41,10 +41,10 @@ namespace BitMaskSorter
                     //sort negative numbers
                     maskParts = CalculateMaskParts(array, start, finalLeft);
                     mask = maskParts.Item1 & maskParts.Item2;
-                    kList = GetMaskAsArray(mask);
-                    if (kList.Length > 0)
+                    bList = GetMaskAsArray(mask);
+                    if (bList.Length > 0)
                     {
-                        RadixSort(array, start, finalLeft, kList);
+                        RadixSort(array, start, finalLeft, bList);
                     }
                 }
 
@@ -53,43 +53,43 @@ namespace BitMaskSorter
                     //sort positive numbers
                     maskParts = CalculateMaskParts(array, finalLeft, endP1);
                     mask = maskParts.Item1 & maskParts.Item2;
-                    kList = GetMaskAsArray(mask);
-                    if (kList.Length > 0)
+                    bList = GetMaskAsArray(mask);
+                    if (bList.Length > 0)
                     {
-                        RadixSort(array, finalLeft, endP1, kList);
+                        RadixSort(array, finalLeft, endP1, bList);
                     }
                 }
             }
             else
             {
-                RadixSort(array, start, endP1, kList);
+                RadixSort(array, start, endP1, bList);
             }
         }
 
-        private void RadixSort(int[] array, int start, int endP1, int[] kList)
+        private void RadixSort(int[] array, int start, int endP1, int[] bList)
         {
             var aux = new int[endP1 - start];
-            RadixSort(array, start, endP1, kList, kList.Length - 1, 0, aux);
+            RadixSort(array, start, endP1, bList, bList.Length - 1, 0, aux);
         }
 
 
-        private static void RadixSort(int[] array, int start, int endP1, int[] kList, int kIndexStart, int kIndexEnd,
+        private static void RadixSort(int[] array, int start, int endP1, int[] bList, int kIndexStart, int kIndexEnd,
             int[] aux)
         {
             var maskInfo = new MaskInfoInt();
-            var sections = maskInfo.GetSections(kList, kIndexStart, kIndexEnd);
+            var sections = maskInfo.GetSections(bList, kIndexStart, kIndexEnd);
             foreach (var section in sections)
             {
                 var maskI = section.Item1;
-                var bits = section.Item2;
+                var length = section.Item2;
                 var shift = section.Item3;
-                if (bits == 1)
+                if (length == 1)
                 {
                     PartitionStable(array, start, endP1, maskI, aux);
                 }
                 else
                 {
-                    var twoPowerBits = 1 << bits;
+                    var twoPowerBits = 1 << length;
                     if (shift == 0)
                     {
                         PartitionStableLastBits(array, start, endP1, maskI, twoPowerBits, aux);

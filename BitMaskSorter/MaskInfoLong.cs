@@ -59,24 +59,24 @@ namespace BitMaskSorter
             return list.ToArray();
         }
 
-        public List<(long, int, int)> GetSections(int[] kList, int kIndexStart, int kIndexEnd)
+        public List<(long, int, int)> GetSections(int[] bList, int bListStart, int bListEnd)
         {
             var parts = new List<(long, int, int)>();
-            for (var i = kIndexStart; i >= kIndexEnd; i--)
+            for (var i = bListStart; i >= bListEnd; i--)
             {
-                var kListI = kList[i];
-                var maskI = 1L << kListI;
-                var bits = 1;
+                var bIndex = bList[i];
+                var mask = 1L << bIndex;
+                var length = 1;
                 var imm = 0;
-                for (var j = 1; j <= SorterConstants.MaxBitsRadixSort - 1; j++)
+                for (var j = 1; j <= SorterConstants.RadixSortMaxBits - 1; j++)
                 {
-                    if (i - j >= kIndexEnd)
+                    if (i - j >= bListEnd)
                     {
-                        var kListIm1 = kList[i - j];
-                        if (kListIm1 == kListI + j)
+                        var bIndexJ = bList[i - j];
+                        if (bIndexJ == bIndex + j)
                         {
-                            maskI = maskI | 1L << kListIm1;
-                            bits++;
+                            mask = mask | 1L << bIndexJ;
+                            length++;
                             imm++;
                         }
                         else
@@ -87,7 +87,7 @@ namespace BitMaskSorter
                 }
 
                 i -= imm;
-                parts.Add((maskI, bits, kListI));
+                parts.Add((mask, length, bIndex));
             }
 
             return parts;

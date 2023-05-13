@@ -102,16 +102,16 @@ namespace BitMaskSorter
             return left;
         }
 
-        public static void PartitionStableLastBits(int[] array, int start, int endP1, int mask, int twoPowerK,
+        public static void PartitionStableLastBits(int[] array, int start, int endP1, int mask, int kRange,
             int[] aux)
         {
-            var count = new int[twoPowerK];
+            var count = new int[kRange];
             for (var i = start; i < endP1; ++i)
             {
                 count[array[i] & mask]++;
             }
 
-            for (int i = 0, sum = 0; i < twoPowerK; ++i)
+            for (int i = 0, sum = 0; i < kRange; ++i)
             {
                 var countI = count[i];
                 count[i] = sum;
@@ -128,15 +128,15 @@ namespace BitMaskSorter
         }
 
         public static void PartitionStableOneGroupBits(int[] array, int start, int endP1, int mask, int shiftRight,
-            int twoPowerK, int[] aux)
+            int kRange, int[] aux)
         {
-            var count = new int[twoPowerK];
+            var count = new int[kRange];
             for (var i = start; i < endP1; i++)
             {
                 count[(array[i] & mask) >> shiftRight]++;
             }
 
-            for (int i = 0, sum = 0; i < twoPowerK; ++i)
+            for (int i = 0, sum = 0; i < kRange; ++i)
             {
                 var countI = count[i];
                 count[i] = sum;
