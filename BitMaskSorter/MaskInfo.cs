@@ -22,5 +22,8 @@ namespace BitMaskSorter
 
         TM GetMaskRangeBits(int bStart, int bEnd);
 
+        void PartitionStableBits<T>(Func<T, TM> convert, T[] array, int start, int endP1,
+            TM maskI, int shift, int kRange,
+            T[] aux);
     }
 }

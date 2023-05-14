@@ -101,15 +101,11 @@ namespace BitMaskSorter
                 else
                 {
                     var kRange = 1 << bits;
-                    PartitionStableBits(array, start, endP1, mask, shift, kRange, aux);
+                    maskInfo.PartitionStableBits(MapToMask(), array, start, endP1, mask, shift, kRange, aux);
                 }
             }
         }
-
-        protected abstract void PartitionStableBits(T[] array, int start, int endP1, TM maskI, int shift,
-            int kRange, T[] aux);
-
-
+        
         private void Swap(T[] array, int left, int right)
         {
             (array[left], array[right]) = (array[right], array[left]);
@@ -305,11 +301,6 @@ namespace BitMaskSorter
         {
             return _maskInfoInt;
         }
-
-        protected override void PartitionStableBits(int[] array, int start, int endP1,
-            int maskI, int shift, int kRange,
-            int[] aux) =>
-            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, kRange, aux);
     }
 
     public class RadixBitSorterGenericFloat : RadixBitSorterGeneric<float, int>
@@ -330,11 +321,6 @@ namespace BitMaskSorter
         {
             return _maskInfoInt;
         }
-
-        protected override void PartitionStableBits(float[] array, int start, int endP1, int maskI, int shift,
-            int kRange,
-            float[] aux) =>
-            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, kRange, aux);
     }
 
 
@@ -353,12 +339,7 @@ namespace BitMaskSorter
         {
             return _maskInfoLong;
         }
-
-
-        protected override void PartitionStableBits(long[] array, int start, int endP1,
-            long maskI, int shift, int kRange,
-            long[] aux) =>
-            PartitionStableBitsLong(MapToMask(), array, start, endP1, maskI, shift, kRange, aux);
+        
     }
 
     public class RadixBitSorterGenericDouble : RadixBitSorterGeneric<double, long>
@@ -379,11 +360,6 @@ namespace BitMaskSorter
         {
             return _maskInfoLong;
         }
-
-        protected override void PartitionStableBits(double[] array, int start, int endP1,
-            long maskI, int shift, int kRange,
-            double[] aux) =>
-            PartitionStableBitsLong(MapToMask(), array, start, endP1, maskI, shift, kRange, aux);
     }
 
 
@@ -404,11 +380,6 @@ namespace BitMaskSorter
         {
             return _maskInfoInt;
         }
-
-        protected override void PartitionStableBits(short[] array, int start, int endP1,
-            int maskI, int shift, int kRange,
-            short[] aux) =>
-            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, kRange, aux);
     }
 
     public class RadixBitSorterGenericUShort : RadixBitSorterGeneric<ushort, int>
@@ -428,11 +399,6 @@ namespace BitMaskSorter
         {
             return _maskInfoInt;
         }
-
-        protected override void PartitionStableBits(ushort[] array, int start, int endP1,
-            int maskI, int shift, int kRange,
-            ushort[] aux) =>
-            PartitionStableBitsInt(MapToMask(), array, start, endP1, maskI, shift, kRange, aux);
     }
 
 }

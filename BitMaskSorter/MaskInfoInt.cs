@@ -60,11 +60,37 @@ namespace BitMaskSorter
 
             return list.ToArray();
         }
-        
+
         public int GetMaskRangeBits(int bStart, int bEnd)
         {
             return ((1 << bStart + 1 - bEnd) - 1) << bEnd;
         }
         
+        public void PartitionStableBits<T>(Func<T, int> convert, T[] array, int start, int endP1, int mask,
+            int shiftRight,
+            int kRange, T[] aux)
+        {
+            var count = new int[kRange];
+            for (var i = start; i < endP1; i++)
+            {
+                count[(convert(array[i]) & mask) >> shiftRight]++;
+            }
+
+
+            for (int i = 0, sum = 0; i < kRange; ++i)
+            {
+                var countI = count[i];
+                count[i] = sum;
+                sum += countI;
+            }
+
+            for (var i = start; i < endP1; i++)
+            {
+                var element = array[i];
+                aux[count[(convert(element) & mask) >> shiftRight]++] = element;
+            }
+
+            Array.Copy(aux, 0, array, start, endP1 - start);
+        }
     }
 }
