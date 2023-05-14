@@ -44,7 +44,10 @@ for (var iteration = 0; iteration < iterations; iteration++)
     // Linearly compare elements
     for (var i = 0; i < arraySize; i++)
         if (arrayAux1[i] != array[i])
-            Console.WriteLine("Arrays are not equal.");
+        {
+            Console.WriteLine("Arrays are not equal. RadixBitSorterInt");
+            break;
+        }
 
     var stopwatch2 = new Stopwatch();
     stopwatch2.Start();
@@ -56,7 +59,10 @@ for (var iteration = 0; iteration < iterations; iteration++)
     // Linearly compare elements
     for (var i = 0; i < arraySize; i++)
         if (arrayAux2[i] != array[i])
-            Console.WriteLine("Arrays are not equal.");
+        {
+            Console.WriteLine("Arrays are not equal. RadixBitSorterGenericInt");
+            break;
+        }
 
     Console.WriteLine();
 }

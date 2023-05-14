@@ -87,12 +87,13 @@ namespace BitMaskSorter
             T[] aux)
         {
             var maskInfo = GetMaskInfoBuilder();
-            var sections = maskInfo.GetSections(bList, kIndexStart, kIndexEnd);
+            var sections = BitSorterUtils.GetSections(bList, kIndexStart, kIndexEnd);
             foreach (var section in sections)
             {
-                var mask = section.Item1;
+                var bStartIndex = section.Item1;
                 var bits = section.Item2;
                 var shift = section.Item3;
+                var mask = maskInfo.GetMaskRangeBits(bStartIndex, shift);
                 if (bits == 1)
                 {
                     PartitionStable(array, start, endP1, e => maskInfo.MaskedEqZero(MapToMask(), e, mask), aux);

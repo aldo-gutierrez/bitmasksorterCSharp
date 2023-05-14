@@ -77,26 +77,27 @@ namespace BitMaskSorter
             int[] aux)
         {
             var maskInfo = new MaskInfoInt();
-            var sections = maskInfo.GetSections(bList, kIndexStart, kIndexEnd);
+            var sections = BitSorterUtils.GetSections(bList, kIndexStart, kIndexEnd);
             foreach (var section in sections)
             {
-                var maskI = section.Item1;
-                var length = section.Item2;
+                var bStartIndex = section.Item1;
+                var bits = section.Item2;
                 var shift = section.Item3;
-                if (length == 1)
+                var mask = maskInfo.GetMaskRangeBits(bStartIndex, shift);
+                if (bits == 1)
                 {
-                    PartitionStable(array, start, endP1, maskI, aux);
+                    PartitionStable(array, start, endP1, mask, aux);
                 }
                 else
                 {
-                    var twoPowerBits = 1 << length;
+                    var kRange = 1 << bits;
                     if (shift == 0)
                     {
-                        PartitionStableLastBits(array, start, endP1, maskI, twoPowerBits, aux);
+                        PartitionStableLastBits(array, start, endP1, mask, kRange, aux);
                     }
                     else
                     {
-                        PartitionStableOneGroupBits(array, start, endP1, maskI, shift, twoPowerBits, aux);
+                        PartitionStableOneGroupBits(array, start, endP1, mask, shift, kRange, aux);
                     }
                 }
             }

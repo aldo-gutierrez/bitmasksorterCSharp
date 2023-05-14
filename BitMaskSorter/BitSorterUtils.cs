@@ -31,5 +31,38 @@ namespace BitMaskSorter
 
             return list.ToArray();
         }
+        
+        public static List<(int, int, int)> GetSections(int[] bList, int bListStart, int bListEnd)
+        {
+            var parts = new List<(int, int, int)>();
+            for (var i = bListStart; i >= bListEnd; i--)
+            {
+                var bIndex = bList[i];
+                var bits = 1;
+                var imm = 0;
+                for (var j = 1; j <= SorterConstants.RadixSortMaxBits - 1; j++)
+                {
+                    if (i - j >= bListEnd)
+                    {
+                        var bIndexJ = bList[i - j];
+                        if (bIndexJ == bIndex + j)
+                        {
+                            bits++;
+                            imm++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                i -= imm;
+                parts.Add((bIndex + bits - 1, bits, bIndex));
+            }
+
+            return parts;
+        }
+        
     }
 }
