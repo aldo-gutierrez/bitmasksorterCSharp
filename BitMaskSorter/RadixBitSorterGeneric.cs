@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 namespace BitMaskSorter
 {
     public abstract class RadixBitSorterGeneric<T, TM>
-        where T : struct, IComparable, IComparable<T>, IConvertible, IEquatable<T>, IFormattable
         where TM : struct, IComparable, IComparable<TM>, IConvertible, IEquatable<TM>, IFormattable
     {
         public void Sort(T[] array, int start, int endP1)
@@ -236,10 +235,7 @@ namespace BitMaskSorter
         protected override bool IsIeee754() => false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override Func<int, int> MapToMask()
-        {
-            return e => e;
-        }
+        protected override Func<int, int> MapToMask() => e => e;
 
         protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
@@ -256,10 +252,7 @@ namespace BitMaskSorter
         protected override bool IsIeee754() => true;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override unsafe Func<float, int> MapToMask()
-        {
-            return e => *(int*)&e;
-        }
+        protected override unsafe Func<float, int> MapToMask() => e => *(int*)&e;
 
         protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
@@ -295,17 +288,13 @@ namespace BitMaskSorter
         protected override bool IsIeee754() => true;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override unsafe Func<double, long> MapToMask()
-        {
-            return e => *(long*)(&e);
-        }
+        protected override unsafe Func<double, long> MapToMask() => e => *(long*)(&e);
 
         protected override IMaskInfo<long> GetMaskInfoBuilder()
         {
             return _maskInfoLong;
         }
     }
-
 
     public class RadixBitSorterGenericShort : RadixBitSorterGeneric<short, int>
     {
@@ -315,10 +304,7 @@ namespace BitMaskSorter
         protected override bool IsIeee754() => false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override Func<short, int> MapToMask()
-        {
-            return e => e;
-        }
+        protected override Func<short, int> MapToMask() => e => e;
 
         protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
@@ -334,10 +320,7 @@ namespace BitMaskSorter
         protected override bool IsIeee754() => false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override Func<ushort, int> MapToMask()
-        {
-            return e => e;
-        }
+        protected override Func<ushort, int> MapToMask() => e => e;
 
         protected override IMaskInfo<int> GetMaskInfoBuilder()
         {
