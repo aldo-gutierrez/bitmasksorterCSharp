@@ -20,17 +20,6 @@ namespace BitMaskSorter
             _iMask = parts.Item2;
         }
 
-
-        public bool MaskedEqZero<T>(Func<T, long> convert, T e, long mask)
-        {
-            return (convert(e) & mask) == 0L;
-        }
-
-        public bool GreaterOrEqZero<T>(Func<T, long> convert, T e)
-        {
-            return convert(e) >= 0L;
-        }
-
         public (long, long) CalculateMask<T>(Func<T, long> convert, T[] array, int start, int endP1)
         {
             long pMask = 0x0000000000000000;
@@ -62,32 +51,6 @@ namespace BitMaskSorter
         public long GetMaskRangeBits(int bStart, int bEnd)
         {
             return ((1L << bStart + 1 - bEnd) - 1L) << bEnd;
-        }
-
-        public void PartitionStableBits<T>(Func<T, long> convert, T[] array, int start, int endP1, long mask,
-            int shiftRight,
-            int kRange, T[] aux)
-        {
-            var count = new int[kRange];
-            for (var i = start; i < endP1; i++)
-            {
-                count[(convert(array[i]) & mask) >> shiftRight]++;
-            }
-
-            for (int i = 0, sum = 0; i < kRange; ++i)
-            {
-                var countI = count[i];
-                count[i] = sum;
-                sum += countI;
-            }
-
-            for (var i = start; i < endP1; i++)
-            {
-                var element = array[i];
-                aux[count[(convert(element) & mask) >> shiftRight]++] = element;
-            }
-
-            Array.Copy(aux, 0, array, start, endP1 - start);
         }
     }
 }
